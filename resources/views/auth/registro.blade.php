@@ -36,6 +36,15 @@
 
             <input type="password" name="password" placeholder="Contraseña">
 
+            <label>Introduce el código:</label><br>
+
+            <div style="background:#ddd;padding:10px;font-weight:bold;letter-spacing:3px;">
+                {{ $captcha }}
+            </div>
+            <input type="text" name="captcha_usuario" placeholder="Escribe el código">
+            <br><br>
+
+
             <button type="submit">Registrarse</button>
 
         </form>

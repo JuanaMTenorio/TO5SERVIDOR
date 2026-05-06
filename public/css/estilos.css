@@ -7,7 +7,7 @@ body {
 }
 
 .contenedor {
-    width: 400px;
+    width: 700px;
     margin: 80px auto;
     background-color: #ecf0f1;
     padding: 30px;
@@ -41,4 +41,63 @@ button {
 
 button:hover {
     background-color: #1a252f;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.checkbox-group label {
+    margin: 0;
+    color: #2c3e50;
+}
+
+
+
+.botonera {
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.boton {
+    display: inline-block;
+    padding: 10px 14px;
+    background-color: #2c3e50;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.boton:hover {
+    background-color: #1a252f;
+}
+
+.boton-rojo {
+    background-color: #c0392b;
+}
+
+.boton-rojo:hover {
+    background-color: #922b21;
+}
+
+.fila-botones {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.fila-botones-centro {
+    display: flex;
+    justify-content: center;
 }

@@ -12,12 +12,17 @@ class AuthController extends Controller
 
     public function mostrarRegistro()
     {
-        return view('auth.registro');
+        $captcha = $this->generarCaptcha();
+        return view('auth.registro', compact('captcha'));
     }
 
     public function registrar(Request $request)
     {
         try {
+            // Validar captcha
+            if ($request->captcha_usuario !== session('captcha')) {
+                return redirect('/registro')->with('error', 'Captcha incorrecto');
+            }
             // 1. Recoger datos del formulario
             $nick = $request->nick;
             $nombre = $request->nombre;
@@ -42,7 +47,8 @@ class AuthController extends Controller
                 ':password' => $password_encriptada,
                 ':rol' => 'usuario'
             ]);
-            return redirect('/registro')->with('success', 'Usuario registrado correctamente');
+
+            return redirect('/panel')->with('success', 'Usuario registrado correctamente');
         } catch (\PDOException $e) {
             return redirect('/registro')->with('error', 'Error al registrar: ' . $e->getMessage());
         }
@@ -50,7 +56,8 @@ class AuthController extends Controller
 
     public function mostrarLogin()
     {
-        return view('auth.login');
+        $captcha = $this->generarCaptcha();
+        return view('auth.login', compact('captcha'));
     }
 
 
@@ -58,6 +65,10 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
+            // Validar captcha
+            if ($request->captcha_usuario !== session('captcha')) {
+                return redirect('/login')->with('error', 'Captcha incorrecto');
+            }
             // 1. Recoger datos del formulario
             $email = $request->email;
             $password = $request->password;
@@ -79,6 +90,10 @@ class AuthController extends Controller
                         'usuario_nombre' => $usuario['nombre'],
                         'usuario_rol' => $usuario['rol']
                     ]);
+                    // MANTENER SESIÓN ABIERTA
+                    if ($request->has('mantener_sesion')) {
+                        session(['mantener_sesion' => true]);
+                    }
                     return redirect('/panel');
                     // RECORDAR USUARIO
                     if ($request->has('recordar')) {
@@ -104,5 +119,16 @@ class AuthController extends Controller
 
         // Redirigimos al login con un mensaje
         return redirect('/login')->with('success', 'Sesión cerrada correctamente');
+    }
+
+    public function generarCaptcha()
+    {
+        $caracteres = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $captcha = substr(str_shuffle($caracteres), 0, 5);
+
+        // Guardar en sesión
+        session(['captcha' => $captcha]);
+
+        return $captcha;
     }
 }

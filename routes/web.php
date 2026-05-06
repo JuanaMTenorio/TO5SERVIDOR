@@ -3,7 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PruebaConexionController;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\EntradaController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,3 +26,9 @@ Route::get('/login', [AuthController::class, 'mostrarLogin']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/logout', [AuthController::class, 'logout']);
+
+Route::get('/categorias/crear', [CategoriaController::class, 'crear']);
+Route::post('/categorias/guardar', [CategoriaController::class, 'guardar']);
+
+Route::get('/entradas/crear', [EntradaController::class, 'crear']);
+Route::post('/entradas/guardar', [EntradaController::class, 'guardar']);
