@@ -10,12 +10,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/panel', function () {
+/*Route::get('/panel', function () {
     if (!session()->has('usuario_id')) {
         return redirect('/login')->with('error', 'Debes iniciar sesión');
     }
     return view('panel');
-});
+});*/
+
+Route::get('/panel', [EntradaController::class, 'panel']);
 
 Route::get('/probar-conexion', [PruebaConexionController::class, 'index']);
 
@@ -32,3 +34,9 @@ Route::post('/categorias/guardar', [CategoriaController::class, 'guardar']);
 
 Route::get('/entradas/crear', [EntradaController::class, 'crear']);
 Route::post('/entradas/guardar', [EntradaController::class, 'guardar']);
+
+Route::get('/entradas/detalle/{id}', [EntradaController::class, 'detalle']);
+Route::get('/entradas/eliminar/{id}', [EntradaController::class, 'eliminar']);
+
+Route::get('/entradas/editar/{id}', [EntradaController::class, 'editar']);
+Route::post('/entradas/actualizar/{id}', [EntradaController::class, 'actualizar']);

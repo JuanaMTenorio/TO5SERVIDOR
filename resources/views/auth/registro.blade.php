@@ -48,7 +48,8 @@
             <button type="submit">Registrarse</button>
 
         </form>
-
+        <br>
+        <a href="{{ url('/panel') }}" class="boton">Volver al panel</a>
     </div>
 
 </body>
