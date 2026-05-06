@@ -12,10 +12,10 @@
             {{ session('error') }}
         </div>
         @endif
-        <form action="{{ url('/entradas/guardar') }}" method="POST">
+        <form action="{{ url('/entradas/guardar') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <input type="text" name="titulo" placeholder="Título de la entrada">
-            <input type="text" name="imagen" placeholder="Nombre de la imagen">
+            <input type="file" name="imagen" placeholder="Imagen de la entrada">
             <textarea name="descripcion" placeholder="Descripción de la entrada"></textarea>
             <input type="date" name="fecha">
             <select name="categoria_id">

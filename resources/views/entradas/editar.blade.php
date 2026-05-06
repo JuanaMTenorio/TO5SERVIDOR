@@ -9,10 +9,15 @@
 <body>
     <div class="contenedor">
         <h2>Editar entrada</h2>
-        <form action="{{ url('/entradas/actualizar/' . $entrada['id']) }}" method="POST">
+        <form action="{{ url('/entradas/actualizar/' . $entrada['id']) }}" method="POST" enctype="multipart/form-data">
             @csrf
             <input type="text" name="titulo" value="{{ $entrada['titulo'] }}">
-            <input type="text" name="imagen" value="{{ $entrada['imagen'] }}">
+            @if($entrada['imagen'])
+            <p>Imagen actual:</p>
+            <img src="{{ asset('images/' . $entrada['imagen']) }}" width="120">
+            @endif
+
+            <input type="file" name="imagen">
             <textarea name="descripcion">{{ $entrada['descripcion'] }}</textarea>
             <input type="date" name="fecha" value="{{ date('Y-m-d', strtotime($entrada['fecha'])) }}">
 

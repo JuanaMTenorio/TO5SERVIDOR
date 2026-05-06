@@ -5,6 +5,8 @@ use App\Http\Controllers\PruebaConexionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\EntradaController;
+use App\Http\Controllers\UsuarioController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -40,3 +42,15 @@ Route::get('/entradas/eliminar/{id}', [EntradaController::class, 'eliminar']);
 
 Route::get('/entradas/editar/{id}', [EntradaController::class, 'editar']);
 Route::post('/entradas/actualizar/{id}', [EntradaController::class, 'actualizar']);
+
+Route::get('/usuarios', [UsuarioController::class, 'listar']);
+Route::get('/usuarios/detalle/{id}', [UsuarioController::class, 'detalle']);
+Route::get('/usuarios/editar/{id}', [UsuarioController::class, 'editar']);
+Route::post('/usuarios/actualizar/{id}', [UsuarioController::class, 'actualizar']);
+Route::get('/usuarios/eliminar/{id}', [UsuarioController::class, 'eliminar']);
+
+Route::get('/categorias', [CategoriaController::class, 'listar']);
+Route::get('/categorias/detalle/{id}', [CategoriaController::class, 'detalle']);
+Route::get('/categorias/eliminar/{id}', [CategoriaController::class, 'eliminar']);
+Route::get('/categorias/editar/{id}', [CategoriaController::class, 'editar']);
+Route::post('/categorias/actualizar/{id}', [CategoriaController::class, 'actualizar']);

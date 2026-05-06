@@ -32,7 +32,18 @@ class EntradaController extends Controller
             $usuario_id = session('usuario_id');
             $categoria_id = $request->categoria_id;
             $titulo = trim(strip_tags($request->titulo));
-            $imagen = trim(strip_tags($request->imagen));
+            $imagenNombre = null;
+
+            if ($request->hasFile('imagen')) {
+                $imagenArchivo = $request->file('imagen');
+
+                // Generar nombre único
+                $imagenNombre = time() . "_" . $imagenArchivo->getClientOriginalName();
+
+                // Guardar en carpeta images
+                $imagenArchivo->move(public_path('images'), $imagenNombre);
+            }
+
             $descripcion = trim(strip_tags($request->descripcion));
             $fecha = $request->fecha;
             // 3. Validación básica
@@ -54,7 +65,7 @@ class EntradaController extends Controller
                 ':usuario_id' => $usuario_id,
                 ':categoria_id' => $categoria_id,
                 ':titulo' => $titulo,
-                ':imagen' => $imagen,
+                ':imagen' => $imagenNombre,
                 ':descripcion' => $descripcion,
                 ':fecha' => $fecha
             ]);
@@ -122,6 +133,24 @@ class EntradaController extends Controller
 
             $conexion = \App\Config\Database::conectar();
 
+            // 1. Buscar la entrada antes de eliminarla
+            $sqlEntrada = "SELECT * FROM Entradas WHERE id = :id";
+            $stmtEntrada = $conexion->prepare($sqlEntrada);
+            $stmtEntrada->execute([':id' => $id]);
+
+            $entrada = $stmtEntrada->fetch(\PDO::FETCH_ASSOC);
+            // 2. Si la entrada no existe
+            if (!$entrada) {
+                return redirect('/panel')->with('error', 'La entrada no existe');
+            }
+            // 3. Comprobar permisos
+            if (
+                session('usuario_rol') != 'administrador' &&
+                session('usuario_id') != $entrada['usuario_id']
+            ) {
+                return redirect('/panel')->with('error', 'No tienes permisos para eliminar esta entrada');
+            }
+            // 4. Eliminar entrada
             $sql = "DELETE FROM Entradas WHERE id = :id";
             $stmt = $conexion->prepare($sql);
             $stmt->execute([':id' => $id]);
@@ -135,38 +164,79 @@ class EntradaController extends Controller
     public function editar($id)
     {
         try {
+            if (!session()->has('usuario_id')) {
+                return redirect('/login')->with('error', 'Debes iniciar sesión');
+            }
+
             $conexion = \App\Config\Database::conectar();
 
-            // Obtener entrada
             $sql = "SELECT * FROM Entradas WHERE id = :id";
             $stmt = $conexion->prepare($sql);
             $stmt->execute([':id' => $id]);
 
             $entrada = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            // Obtener categorías
+            if (!$entrada) {
+                return redirect('/panel')->with('error', 'La entrada no existe');
+            }
+
+            if (
+                session('usuario_rol') != 'administrador' &&
+                session('usuario_id') != $entrada['usuario_id']
+            ) {
+                return redirect('/panel')->with('error', 'No tienes permisos para editar esta entrada');
+            }
+
             $sqlCat = "SELECT * FROM Categorias";
             $stmtCat = $conexion->query($sqlCat);
             $categorias = $stmtCat->fetchAll(\PDO::FETCH_ASSOC);
 
             return view('entradas.editar', compact('entrada', 'categorias'));
         } catch (\PDOException $e) {
-            return "Error al editar: " . $e->getMessage();
+            return redirect('/panel')->with('error', 'Error al editar: ' . $e->getMessage());
         }
     }
 
     public function actualizar(Request $request, $id)
-{
-    try {
-        $conexion = \App\Config\Database::conectar();
+    {
+        try {
+            if (!session()->has('usuario_id')) {
+                return redirect('/login')->with('error', 'Debes iniciar sesión');
+            }
 
-        $titulo = trim(strip_tags($request->titulo));
-        $imagen = trim(strip_tags($request->imagen));
-        $descripcion = trim(strip_tags($request->descripcion));
-        $fecha = $request->fecha;
-        $categoria_id = $request->categoria_id;
+            $conexion = \App\Config\Database::conectar();
 
-        $sql = "UPDATE Entradas 
+            $sqlEntrada = "SELECT * FROM Entradas WHERE id = :id";
+            $stmtEntrada = $conexion->prepare($sqlEntrada);
+            $stmtEntrada->execute([':id' => $id]);
+
+            $entrada = $stmtEntrada->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$entrada) {
+                return redirect('/panel')->with('error', 'La entrada no existe');
+            }
+
+            if (
+                session('usuario_rol') != 'administrador' &&
+                session('usuario_id') != $entrada['usuario_id']
+            ) {
+                return redirect('/panel')->with('error', 'No tienes permisos para actualizar esta entrada');
+            }
+
+            $titulo = trim(strip_tags($request->titulo));
+            $imagen = $entrada['imagen']; // mantenemos la imagen actual
+
+            if ($request->hasFile('imagen')) {
+                $imagenArchivo = $request->file('imagen');
+                $imagen = time() . "_" . $imagenArchivo->getClientOriginalName();
+                $imagenArchivo->move(public_path('images'), $imagen);
+            }
+
+            $descripcion = trim(strip_tags($request->descripcion));
+            $fecha = $request->fecha;
+            $categoria_id = $request->categoria_id;
+
+            $sql = "UPDATE Entradas 
                 SET titulo = :titulo,
                     imagen = :imagen,
                     descripcion = :descripcion,
@@ -174,23 +244,20 @@ class EntradaController extends Controller
                     categoria_id = :categoria_id
                 WHERE id = :id";
 
-        $stmt = $conexion->prepare($sql);
+            $stmt = $conexion->prepare($sql);
 
-        $stmt->execute([
-            ':titulo' => $titulo,
-            ':imagen' => $imagen,
-            ':descripcion' => $descripcion,
-            ':fecha' => $fecha,
-            ':categoria_id' => $categoria_id,
-            ':id' => $id
-        ]);
+            $stmt->execute([
+                ':titulo' => $titulo,
+                ':imagen' => $imagen,
+                ':descripcion' => $descripcion,
+                ':fecha' => $fecha,
+                ':categoria_id' => $categoria_id,
+                ':id' => $id
+            ]);
 
-        return redirect('/panel')->with('success', 'Entrada actualizada correctamente');
-
-    } catch (\PDOException $e) {
-        return redirect('/panel')->with('error', 'Error al actualizar: ' . $e->getMessage());
+            return redirect('/panel')->with('success', 'Entrada actualizada correctamente');
+        } catch (\PDOException $e) {
+            return redirect('/panel')->with('error', 'Error al actualizar: ' . $e->getMessage());
+        }
     }
-}
-
-    
 }
