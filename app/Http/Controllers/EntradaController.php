@@ -77,26 +77,57 @@ class EntradaController extends Controller
         }
     }
 
-    public function panel()
+    public function panel(Request $request)
     {
         try {
-            // PROTEGER ACCESO
+            // 1. Proteger acceso
             if (!session()->has('usuario_id')) {
                 return redirect('/login')->with('error', 'Debes iniciar sesión');
             }
 
             $conexion = \App\Config\Database::conectar();
 
-            // JOIN entradas + categorias
+            // 2. Página actual
+            $pagina = $request->pagina ?? 1;
+
+            // 3. Registros por página
+            $registrosPorPagina = $request->registros ?? 5;
+
+            // 4. Calcular desde qué registro empieza
+            $inicio = ($pagina - 1) * $registrosPorPagina;
+
+            // 5. Contar el total de entradas
+            $sqlTotal = "SELECT COUNT(*) AS total FROM Entradas";
+            $stmtTotal = $conexion->query($sqlTotal);
+            $resultadoTotal = $stmtTotal->fetch(\PDO::FETCH_ASSOC);
+            $totalEntradas = $resultadoTotal['total'];
+
+            // 6. Calcular total de páginas
+            $totalPaginas = ceil($totalEntradas / $registrosPorPagina);
+
+            // 7. Obtener solo las entradas de la página actual
             $sql = "SELECT e.*, c.nombre AS categoria 
                 FROM Entradas e
                 INNER JOIN Categorias c ON e.categoria_id = c.id
-                ORDER BY e.fecha DESC";
+                ORDER BY e.fecha DESC
+                LIMIT :inicio, :registros";
 
-            $stmt = $conexion->query($sql);
+            $stmt = $conexion->prepare($sql);
+
+            $stmt->bindValue(':inicio', (int)$inicio, \PDO::PARAM_INT);
+            $stmt->bindValue(':registros', (int)$registrosPorPagina, \PDO::PARAM_INT);
+
+            $stmt->execute();
+
             $entradas = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            return view('panel', compact('entradas'));
+            return view('panel', compact(
+                'entradas',
+                'pagina',
+                'registrosPorPagina',
+                'totalPaginas',
+                'totalEntradas'
+            ));
         } catch (\PDOException $e) {
             return "Error al cargar entradas: " . $e->getMessage();
         }

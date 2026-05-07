@@ -83,6 +83,38 @@
         @else
         <p>No hay entradas</p>
         @endif
+        <div class="paginacion">
+
+            <p>
+                Total de entradas: {{ $totalEntradas }} |
+                Total de páginas: {{ $totalPaginas }}
+            </p>
+
+            <form action="{{ url('/panel') }}" method="GET">
+
+                <label>Registros por página:</label>
+                <select name="registros">
+                    <option value="5" {{ $registrosPorPagina == 5 ? 'selected' : '' }}>5</option>
+                    <option value="10" {{ $registrosPorPagina == 10 ? 'selected' : '' }}>10</option>
+                    <option value="20" {{ $registrosPorPagina == 20 ? 'selected' : '' }}>20</option>
+                </select>
+
+                <label>Ir a página:</label>
+                <input type="number" name="pagina" min="1" max="{{ $totalPaginas }}" value="{{ $pagina }}">
+
+                <button type="submit">Ir</button>
+            </form>
+
+            <div class="enlaces-paginas">
+                @for($i = 1; $i <= $totalPaginas; $i++)
+                    <a href="{{ url('/panel?pagina=' . $i . '&registros=' . $registrosPorPagina) }}"
+                    class="btn {{ $pagina == $i ? 'btn-detalle' : 'btn-editar' }}">
+                    {{ $i }}
+                    </a>
+                    @endfor
+            </div>
+
+        </div>
     </div>
 
 </body>

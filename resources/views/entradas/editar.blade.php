@@ -4,6 +4,7 @@
 <head>
     <title>Editar entrada</title>
     <link rel="stylesheet" href="{{ asset('css/estilos.css') }}">
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/48.0.1/ckeditor5.css">
 </head>
 
 <body>
@@ -18,7 +19,7 @@
             @endif
 
             <input type="file" name="imagen">
-            <textarea name="descripcion">{{ $entrada['descripcion'] }}</textarea>
+            <textarea name="descripcion" id="descripcion">{{ $entrada['descripcion'] }}</textarea>
             <input type="date" name="fecha" value="{{ date('Y-m-d', strtotime($entrada['fecha'])) }}">
 
             <select name="categoria_id">
@@ -34,8 +35,27 @@
         </form>
         <br>
         <a href="{{ url('/panel') }}" class="boton">Volver al panel</a>
-
     </div>
+    <script src="https://cdn.ckeditor.com/ckeditor5/48.0.1/ckeditor5.umd.js"></script>
+    <script>
+        const {
+            ClassicEditor,
+            Essentials,
+            Paragraph,
+            Bold,
+            Italic
+        } = CKEDITOR;
+
+        ClassicEditor
+            .create(document.querySelector('#descripcion'), {
+                licenseKey: 'GPL',
+                plugins: [Essentials, Paragraph, Bold, Italic],
+                toolbar: ['undo', 'redo', '|', 'bold', 'italic']
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    </script>
 </body>
 
 </html>

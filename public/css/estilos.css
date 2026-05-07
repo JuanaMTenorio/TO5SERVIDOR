@@ -146,3 +146,27 @@ button:hover {
 .btn-detalle:hover {
     background-color: #1c4560;
 }
+
+
+.paginacion {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.paginacion form {
+    margin-bottom: 15px;
+}
+
+.paginacion select,
+.paginacion input {
+    width: auto;
+    padding: 6px;
+    margin: 5px;
+}
+
+.enlaces-paginas {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
