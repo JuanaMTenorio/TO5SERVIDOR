@@ -80,7 +80,7 @@ class EntradaController extends Controller
                 ':usuario' => session('usuario_nombre'),
                 ':operacion' => 'Crear entrada'
             ]);
-            
+
             // 6. Volvemos al panel
             return redirect('/panel')->with('success', 'Entrada guardada correctamente');
         } catch (\PDOException $e) {
@@ -99,6 +99,9 @@ class EntradaController extends Controller
 
             $conexion = \App\Config\Database::conectar();
 
+            // Busqueda
+            $buscar = $request->buscar ?? '';
+
             // 2. Página actual
             $pagina = $request->pagina ?? 1;
 
@@ -109,8 +112,16 @@ class EntradaController extends Controller
             $inicio = ($pagina - 1) * $registrosPorPagina;
 
             // 5. Contar el total de entradas
-            $sqlTotal = "SELECT COUNT(*) AS total FROM Entradas";
-            $stmtTotal = $conexion->query($sqlTotal);
+            $sqlTotal = "SELECT COUNT(*) AS total 
+             FROM Entradas 
+             WHERE titulo LIKE :buscar 
+                OR descripcion LIKE :buscar";
+
+            $stmtTotal = $conexion->prepare($sqlTotal);
+            $stmtTotal->execute([
+                ':buscar' => '%' . $buscar . '%'
+            ]);
+
             $resultadoTotal = $stmtTotal->fetch(\PDO::FETCH_ASSOC);
             $totalEntradas = $resultadoTotal['total'];
 
@@ -126,6 +137,8 @@ class EntradaController extends Controller
             $sql = "SELECT e.*, c.nombre AS categoria 
                 FROM Entradas e
                 INNER JOIN Categorias c ON e.categoria_id = c.id
+                WHERE e.titulo LIKE :buscar 
+                OR e.descripcion LIKE :buscar
                 ORDER BY e.fecha $orden
                 LIMIT :inicio, :registros";
 
@@ -134,6 +147,7 @@ class EntradaController extends Controller
             $stmt->bindValue(':inicio', (int)$inicio, \PDO::PARAM_INT);
             $stmt->bindValue(':registros', (int)$registrosPorPagina, \PDO::PARAM_INT);
 
+            $stmt->bindValue(':buscar', '%' . $buscar . '%', \PDO::PARAM_STR);
             $stmt->execute();
 
             $entradas = $stmt->fetchAll(\PDO::FETCH_ASSOC);

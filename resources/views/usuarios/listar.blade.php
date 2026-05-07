@@ -10,6 +10,7 @@
     <div class="contenedor">
         <h2>Listado de usuarios</h2>
         @if(session('success'))
+
         <div class="alert-success">
             {{ session('success') }}
         </div>
@@ -21,6 +22,12 @@
         </div>
         @endif
         @if(count($usuarios) > 0)
+
+        <form method="GET" action="{{ url('/usuarios') }}">
+            <input type="text" name="buscar" placeholder="Buscar usuario..." value="{{ request('buscar') }}">
+            <button type="submit">Buscar</button>
+        </form>
+
         <table border="1" width="100%" cellpadding="5">
             <tr>
                 <th>Nick</th>

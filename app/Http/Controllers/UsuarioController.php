@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use App\Exports\UsuariosExport;
+use Maatwebsite\Excel\Facades\Excel;
+
 class UsuarioController extends Controller
 {
 
 
-    public function listar()
+    public function listar(Request $request)
     {
         try {
             // Seguridad
@@ -18,8 +21,18 @@ class UsuarioController extends Controller
 
             $conexion = \App\Config\Database::conectar();
 
-            $sql = "SELECT * FROM Usuarios";
-            $stmt = $conexion->query($sql);
+            $buscar = $request->buscar ?? '';
+
+            $sql = "SELECT * FROM Usuarios
+                WHERE nick LIKE :buscar
+                OR nombre LIKE :buscar 
+                OR email LIKE :buscar";
+
+            $stmt = $conexion->prepare($sql);
+
+            $stmt->execute([
+                ':buscar' => '%' . $buscar . '%'
+            ]);
 
             $usuarios = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -121,42 +134,53 @@ class UsuarioController extends Controller
 
 
     public function eliminar($id)
-{
-    try {
-        if (!session()->has('usuario_id')) {
-            return redirect('/login')->with('error', 'Debes iniciar sesión');
-        }
+    {
+        try {
+            if (!session()->has('usuario_id')) {
+                return redirect('/login')->with('error', 'Debes iniciar sesión');
+            }
 
-        $conexion = \App\Config\Database::conectar();
+            $conexion = \App\Config\Database::conectar();
 
-        /*
+            /*
             Antes de eliminar un usuario, comprobamos si tiene entradas.
             El enunciado dice que no se podrán eliminar registros
             que tengan registros relacionados.
         */
-        $sqlComprobar = "SELECT COUNT(*) AS total FROM Entradas WHERE usuario_id = :id";
-        $stmtComprobar = $conexion->prepare($sqlComprobar);
-        $stmtComprobar->execute([':id' => $id]);
-        $resultado = $stmtComprobar->fetch(\PDO::FETCH_ASSOC);
+            $sqlComprobar = "SELECT COUNT(*) AS total FROM Entradas WHERE usuario_id = :id";
+            $stmtComprobar = $conexion->prepare($sqlComprobar);
+            $stmtComprobar->execute([':id' => $id]);
+            $resultado = $stmtComprobar->fetch(\PDO::FETCH_ASSOC);
 
-        if ($resultado['total'] > 0) {
+            if ($resultado['total'] > 0) {
+                return redirect('/usuarios')
+                    ->with('error', 'No se puede eliminar el usuario porque tiene entradas asociadas');
+            }
+
+            $sql = "DELETE FROM Usuarios WHERE id = :id";
+            $stmt = $conexion->prepare($sql);
+            $stmt->execute([':id' => $id]);
+
             return redirect('/usuarios')
-                ->with('error', 'No se puede eliminar el usuario porque tiene entradas asociadas');
+                ->with('success', 'Usuario eliminado correctamente');
+        } catch (\PDOException $e) {
+            return redirect('/usuarios')
+                ->with('error', 'Error al eliminar usuario: ' . $e->getMessage());
+        }
+    }
+
+
+
+    public function exportar()
+    {
+        if (!session()->has('usuario_id')) {
+            return redirect('/login')->with('error', 'Debes iniciar sesión');
         }
 
-        $sql = "DELETE FROM Usuarios WHERE id = :id";
-        $stmt = $conexion->prepare($sql);
-        $stmt->execute([':id' => $id]);
+        if (session('usuario_rol') != 'administrador') {
+            return redirect('/panel')->with('error', 'No tienes permisos');
+        }
 
-        return redirect('/usuarios')
-            ->with('success', 'Usuario eliminado correctamente');
-
-    } catch (\PDOException $e) {
-        return redirect('/usuarios')
-            ->with('error', 'Error al eliminar usuario: ' . $e->getMessage());
+        return Excel::download(new UsuariosExport, 'usuarios.xlsx');
     }
-}
-
-
-
 }

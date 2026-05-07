@@ -6,7 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\EntradaController;
 use App\Http\Controllers\UsuarioController;
-
+use App\Http\Controllers\LogController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -56,3 +56,9 @@ Route::get('/categorias/editar/{id}', [CategoriaController::class, 'editar']);
 Route::post('/categorias/actualizar/{id}', [CategoriaController::class, 'actualizar']);
 
 Route::get('/entradas/pdf', [EntradaController::class, 'pdf']);
+
+Route::get('/logs', [LogController::class, 'listar']);
+Route::get('/logs/eliminar/{id}', [LogController::class, 'eliminar']);
+Route::get('/logs/pdf', [LogController::class, 'pdf']);
+
+Route::get('/usuarios/exportar', [UsuarioController::class, 'exportar']);

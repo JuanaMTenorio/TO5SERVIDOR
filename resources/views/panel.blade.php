@@ -17,6 +17,11 @@
         @endif
         <p>Has accedido a una zona privada</p>
 
+        <form method="GET" action="{{ url('/panel') }}">
+            <input type="text" name="buscar" placeholder="Buscar entrada por titulo..." value="{{ request('buscar') }}">
+            <button type="submit">Buscar</button>
+        </form>
+        <p></p>
         <div class="botonera">
             <div class="fila-botones">
                 @if(session('usuario_rol') == 'administrador')
@@ -26,6 +31,7 @@
                 <a href="{{ url('/categorias') }}" class="boton">Listado categorías</a>
                 @endif
                 <a href="{{ url('/entradas/crear') }}" class="boton">Crear entrada</a>
+                <a href="{{ url('/logs') }} " class="boton"> Gestión logs</a>
             </div>
             <div class="fila-botones-centro">
                 <a href="{{ url('/logout') }}" class="boton boton-rojo">Cerrar sesión</a>
