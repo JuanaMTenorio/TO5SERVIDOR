@@ -54,3 +54,5 @@ Route::get('/categorias/detalle/{id}', [CategoriaController::class, 'detalle']);
 Route::get('/categorias/eliminar/{id}', [CategoriaController::class, 'eliminar']);
 Route::get('/categorias/editar/{id}', [CategoriaController::class, 'editar']);
 Route::post('/categorias/actualizar/{id}', [CategoriaController::class, 'actualizar']);
+
+Route::get('/entradas/pdf', [EntradaController::class, 'pdf']);

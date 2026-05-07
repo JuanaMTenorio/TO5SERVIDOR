@@ -19,8 +19,7 @@
             @csrf
             <input type="text" name="titulo" placeholder="Título de la entrada">
             <input type="file" name="imagen" placeholder="Imagen de la entrada">
-            <textarea name="descripcion" id="descripcion" placeholder="Descripción de la entrada"></textarea>
-            <input type="date" name="fecha">
+            <textarea name="descripcion" id="descripcion" placeholder="Descripción de la entrada"></textarea> <input type="date" name="fecha">
             <select name="categoria_id">
                 <option value="">Selecciona una categoría</option>
 
@@ -36,25 +35,9 @@
         <br>
         <a href="{{ url('/panel') }}" class="boton">Volver al panel</a>
     </div>
-    <script src="https://cdn.ckeditor.com/ckeditor5/48.0.1/ckeditor5.umd.js"></script>
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
     <script>
-        const {
-            ClassicEditor,
-            Essentials,
-            Paragraph,
-            Bold,
-            Italic
-        } = CKEDITOR;
-
-        ClassicEditor
-            .create(document.querySelector('#descripcion'), {
-                licenseKey: 'GPL',
-                plugins: [Essentials, Paragraph, Bold, Italic],
-                toolbar: ['undo', 'redo', '|', 'bold', 'italic']
-            })
-            .catch(error => {
-                console.error(error);
-            });
+        CKEDITOR.replace('descripcion');
     </script>
 </body>
 

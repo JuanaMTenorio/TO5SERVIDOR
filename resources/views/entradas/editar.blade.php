@@ -19,8 +19,7 @@
             @endif
 
             <input type="file" name="imagen">
-            <textarea name="descripcion" id="descripcion">{{ $entrada['descripcion'] }}</textarea>
-            <input type="date" name="fecha" value="{{ date('Y-m-d', strtotime($entrada['fecha'])) }}">
+            <textarea name="descripcion" id="descripcion">{{ $entrada['descripcion'] }}</textarea> <input type="date" name="fecha" value="{{ date('Y-m-d', strtotime($entrada['fecha'])) }}">
 
             <select name="categoria_id">
                 @foreach($categorias as $categoria)
@@ -36,25 +35,9 @@
         <br>
         <a href="{{ url('/panel') }}" class="boton">Volver al panel</a>
     </div>
-    <script src="https://cdn.ckeditor.com/ckeditor5/48.0.1/ckeditor5.umd.js"></script>
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
     <script>
-        const {
-            ClassicEditor,
-            Essentials,
-            Paragraph,
-            Bold,
-            Italic
-        } = CKEDITOR;
-
-        ClassicEditor
-            .create(document.querySelector('#descripcion'), {
-                licenseKey: 'GPL',
-                plugins: [Essentials, Paragraph, Bold, Italic],
-                toolbar: ['undo', 'redo', '|', 'bold', 'italic']
-            })
-            .catch(error => {
-                console.error(error);
-            });
+        CKEDITOR.replace('descripcion');
     </script>
 </body>
 

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use Barryvdh\DomPDF\Facade\Pdf;
+
 class EntradaController extends Controller
 {
     public function crear()
@@ -69,6 +71,16 @@ class EntradaController extends Controller
                 ':descripcion' => $descripcion,
                 ':fecha' => $fecha
             ]);
+
+            // Guardo el logs
+            $sqlLog = "CALL insertar_log(:usuario, :operacion)";
+            $stmtLog = $conexion->prepare($sqlLog);
+
+            $stmtLog->execute([
+                ':usuario' => session('usuario_nombre'),
+                ':operacion' => 'Crear entrada'
+            ]);
+            
             // 6. Volvemos al panel
             return redirect('/panel')->with('success', 'Entrada guardada correctamente');
         } catch (\PDOException $e) {
@@ -105,11 +117,16 @@ class EntradaController extends Controller
             // 6. Calcular total de páginas
             $totalPaginas = ceil($totalEntradas / $registrosPorPagina);
 
+            $orden = $request->orden ?? 'desc';
+
+            if ($orden != 'asc' && $orden != 'desc') {
+                $orden = 'desc';
+            }
             // 7. Obtener solo las entradas de la página actual
             $sql = "SELECT e.*, c.nombre AS categoria 
                 FROM Entradas e
                 INNER JOIN Categorias c ON e.categoria_id = c.id
-                ORDER BY e.fecha DESC
+                ORDER BY e.fecha $orden
                 LIMIT :inicio, :registros";
 
             $stmt = $conexion->prepare($sql);
@@ -126,7 +143,8 @@ class EntradaController extends Controller
                 'pagina',
                 'registrosPorPagina',
                 'totalPaginas',
-                'totalEntradas'
+                'totalEntradas',
+                'orden'
             ));
         } catch (\PDOException $e) {
             return "Error al cargar entradas: " . $e->getMessage();
@@ -289,6 +307,27 @@ class EntradaController extends Controller
             return redirect('/panel')->with('success', 'Entrada actualizada correctamente');
         } catch (\PDOException $e) {
             return redirect('/panel')->with('error', 'Error al actualizar: ' . $e->getMessage());
+        }
+    }
+
+    public function pdf()
+    {
+        try {
+            $conexion = \App\Config\Database::conectar();
+
+            $sql = "SELECT e.*, c.nombre AS categoria
+                FROM Entradas e
+                INNER JOIN Categorias c ON e.categoria_id = c.id
+                ORDER BY e.fecha DESC";
+
+            $stmt = $conexion->query($sql);
+            $entradas = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            $pdf = Pdf::loadView('entradas.pdf', compact('entradas'));
+
+            return $pdf->download('listado_entradas.pdf');
+        } catch (\PDOException $e) {
+            return redirect('/panel')->with('error', 'Error al generar PDF: ' . $e->getMessage());
         }
     }
 }

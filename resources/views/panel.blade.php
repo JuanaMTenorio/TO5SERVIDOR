@@ -34,13 +34,23 @@
         <hr>
         <h3>Listado de entradas</h3>
         @if(count($entradas) > 0)
+        <a href="{{ url('/entradas/pdf') }}" class="boton">Imprimir PDF</a>
+        <p></p>
         <table border="1" width="100%" cellpadding="5">
             <tr>
                 <th>Título</th>
                 <th>Categoría</th>
                 <th>Imagen</th>
                 <th>Descripción</th>
-                <th>Fecha</th>
+                <th>
+                    Fecha
+
+                    @if($orden == 'desc')
+                    <a href="{{ url('/panel?orden=asc&pagina=' . $pagina . '&registros=' . $registrosPorPagina) }}">⬆️</a>
+                    @else
+                    <a href="{{ url('/panel?orden=desc&pagina=' . $pagina . '&registros=' . $registrosPorPagina) }}">⬇️</a>
+                    @endif
+                </th>
                 <th>Operaciones</th>
             </tr>
             @foreach($entradas as $entrada)
